@@ -86,7 +86,7 @@ exports.getUserWithId = getUserWithId;
 
 const addUser = (user) => { // user passig in an object
   return pool
-    .query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *`, [user.name, user.email, user.password])
+    .query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *;`, [user.name, user.email, user.password])
     .then((result) => {
       console.log(result.rows[0]);
       return result.rows[0];
@@ -202,21 +202,36 @@ const getAllProperties = function (options, limit = 10) {
   console.log(queryString, queryParams, queryParams.length);
 
   // 6
-  return pool.query(queryString, queryParams).then((res) => res.rows);
+  return pool
+  .query(queryString, queryParams)
+  .then((res) => res.rows)
+  .catch((err) => console.log(err.message))
 };
 exports.getAllProperties = getAllProperties;
 
 
-//----------------------------------
 /**
  * Add a property to the database
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
-const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
-}
+// const addProperty = function(property) {
+//   const propertyId = Object.keys(properties).length + 1;
+//   property.id = propertyId;
+//   properties[propertyId] = property;
+//   return Promise.resolve(property);
+// }
+// exports.addProperty = addProperty;
+
+const addProperty = (property) => { // user passig in an object
+  return pool.query(`INSERT INTO properties (owner_id, title, description,thumbnail_photo_url, cover_photo_url, cost_per_night, parking_spaces, number_of_bathrooms, number_of_bedrooms, country, street, city, province, post_code, active)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *;`, [property.owner_id, property.title, property.description ,property.thumbnail_photo_url, property.cover_photo_url, property.cost_per_night, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms, property.country, property.street, property.city, property.province, property.post_code, true])
+    .then((result) => {
+      console.log(result.rows[0]);
+      return result.rows[0];
+    })
+    .catch((err) => {
+      return null
+    });
+};
 exports.addProperty = addProperty;
